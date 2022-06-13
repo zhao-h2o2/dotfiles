@@ -1,0 +1,228 @@
+diff --git a/config.ini b/config.ini
+index fb335dc..c80455e 100644
+--- a/config.ini
++++ b/config.ini
+@@ -18,11 +18,11 @@ margin-top = 0
+ ;; File Inclusion
+ ; include an external file, like module file, etc.
+ 
+-include-file = ~/.config/polybar/system.ini
++include-file = ~/.config/openbox/polybar/system.ini
+ 
+-include-file = ~/.config/polybar/default/colors.ini
+-include-file = ~/.config/polybar/default/modules.ini
+-include-file = ~/.config/polybar/default/decor.ini
++include-file = ~/.config/openbox/polybar/default/colors.ini
++include-file = ~/.config/openbox/polybar/default/modules.ini
++include-file = ~/.config/openbox/polybar/default/decor.ini
+ 
+ ;; _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+ 
+@@ -33,7 +33,7 @@ include-file = ~/.config/polybar/default/decor.ini
+ ; If unspecified, the application will pick the first one it finds.
+ ; $ polybar -m | cut -d ':' -f 1
+ ; $ xrandr -q | grep " connected" | cut -d ' ' -f1
+-monitor = ${env:MONITOR}
++monitor =
+ 
+ ; Use the specified monitor as a fallback if the main one is not found.
+ monitor-fallback =
+@@ -143,9 +143,10 @@ font-5 = "archcraft:size=12;3"
+ ;   modules-right = ipc clock
+ 
+ # Default
+-modules-left = LD menu RD dot-alt LD openbox RD
++modules-left = LD menu RD dot-alt LD openbox RD dot cpu dot used-memory dot filesystem
+ modules-center = LD date RD dot-alt LD mpd RD sep song
+-modules-right = volume dot bna dot network dot LD battery RD dot-alt
++modules-right = volume dot backlight dot network dot LD battery RD dot-alt LD sysmenu RD
++
+ # Alternate
+ ;modules-left = openbox 2LD cpu 3LD memory 4LD filesystem 5LD
+ ;modules-center = mpd
+@@ -169,7 +170,7 @@ wm-name =
+ 
+ ; Locale used to localize various module data (e.g. date)
+ ; Expects a valid libc locale, for example: sv_SE.UTF-8
+-locale = en_US.UTF-8
++locale = 
+ 
+ ; Position of the system tray window
+ ; If empty or undefined, tray support will be disabled
+@@ -267,27 +268,6 @@ cursor-scroll =
+ 
+ ;; Application Settings
+ 
+-[bar/extra]
+-inherit = bar/main
+-monitor = ${env:MONITOR}
+-monitor-fallback =
+-modules-left = LD openbox RD
+-modules-center =
+-modules-right = cpu dot used-memory dot filesystem
+-tray-position = none
+-
+-[bar/main-dwm]
+-inherit = bar/main
+-monitor = ${env:MONITOR}
+-monitor-fallback =
+-modules-left = LD sysmenu RD dot-alt LD dwm RD
+-
+-[bar/extra-dwm]
+-inherit = bar/extra
+-monitor = ${env:MONITOR}
+-monitor-fallback =
+-modules-left = LD dwm RD
+-
+ [settings]
+ ; The throttle settings lets the eventloop swallow up til X events
+ ; if they happen within Y millisecond after first event was received.
+diff --git a/launch.sh b/launch.sh
+new file mode 100755
+index 0000000..262bd7c
+--- /dev/null
++++ b/launch.sh
+@@ -0,0 +1,41 @@
++#!/usr/bin/env bash
++
++## Copyright (C) 2020-2022 Aditya Shakya <adi1090x@gmail.com>
++## Everyone is permitted to copy and distribute copies of this file under GNU-GPL3
++
++DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
++CARD="$(light -L | grep 'backlight' | head -n1 | cut -d'/' -f3)"
++INTERFACE="$(ip link | awk '/state UP/ {print $2}' | tr -d :)"
++RFILE="$DIR/.module"
++
++# Fix backlight and network modules
++fix_modules() {
++	if [[ -z "$CARD" ]]; then
++		sed -i -e 's/backlight/bna/g' "$DIR"/config.ini
++	elif [[ "$CARD" != *"intel_"* ]]; then
++		sed -i -e 's/backlight/brightness/g' "$DIR"/config.ini
++	fi
++
++	if [[ "$INTERFACE" == e* ]]; then
++		sed -i -e 's/network/ethernet/g' "$DIR"/config.ini
++	fi
++}
++
++# Launch the bar
++launch_bar() {
++	# Terminate already running bar instances
++	killall -q polybar
++
++	# Wait until the processes have been shut down
++	while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
++
++	# Launch the bar
++	polybar -q main -c "$DIR"/config.ini &
++}
++
++# Execute functions
++if [[ ! -f "$RFILE" ]]; then
++	fix_modules
++	touch "$RFILE"
++fi	
++launch_bar
+diff --git a/modules.ini b/modules.ini
+index 20adb9d..86fdd0b 100644
+--- a/modules.ini
++++ b/modules.ini
+@@ -470,7 +470,7 @@ label = " %mb_used%"
+ [module/used-memory]
+ type = custom/script
+ 
+-exec = LANG=en_US.UTF-8 free -m | sed -n 's/^Mem:\s\+[0-9]\+\s\+\([0-9]\+\)\s.\+/\1/p'
++exec = free -m | sed -n 's/^Mem:\s\+[0-9]\+\s\+\([0-9]\+\)\s.\+/\1/p'
+ 
+ tail = true
+ interval = 5
+@@ -485,7 +485,7 @@ format-prefix-foreground = ${color.CYAN}
+ 
+ label = " %output% MB"
+ 
+-click-left = alacritty -e "htop" &
++click-left = alacritty -e "top" &
+ 
+ ;; _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+ 
+@@ -1026,6 +1026,26 @@ label-empty-padding = 1
+ 
+ ;; _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+ 
++[module/menu]
++type = custom/text
++
++content = 
++content-font = 6
++;content = 異
++;content-font = 2
++content-background = ${color.BGL}
++content-foreground = ${color.LIME}
++content-padding = 0
++
++click-left = ~/.config/openbox/rofi/bin/launcher
++;;click-middle = path_to_script
++;;click-right = path_to_script
++
++;;scroll-up = path_to_script
++;;scroll-down = path_to_script
++
++;; _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
++
+ [module/sysmenu]
+ type = custom/text
+ 
+@@ -1045,52 +1065,3 @@ click-left = ~/.config/openbox/rofi/bin/powermenu
+ ;;	/_____/\____/_/       
+ ;;
+ ;; _-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+-
+-[module/dwm]
+-type = internal/dwm
+-format = <label-tags><label-layout><label-floating>
+-enable-tags-click = true
+-enable-tags-scroll = true
+-tags-scroll-empty = false
+-tags-scroll-reverse = false
+-tags-scroll-wrap = true
+-enable-layout-click = true
+-enable-layout-scroll = true
+-layout-scroll-wrap = true
+-layout-scroll-reverse = true
+-secondary-layout-symbol = [M]
+-label-floating = F
+-label-title = %title%
+-label-title-maxlen = 20
+-label-title-padding = 1
+-label-title-foreground = ${color.FG}
+-label-title-background = ${color.BGL}
+-label-layout = %symbol%
+-label-layout-padding = 1
+-label-layout-foreground = ${color.FG}
+-label-layout-background = ${color.BGL}
+-#current monitor visible tag
+-label-focused = %name%
+-label-focused-background = ${color.BGL}
+-label-focused-foreground = ${color.PURPLE}
+-label-focused-underline = ${color.PURPLE}
+-label-focused-padding = 1
+-#other monitor visible tag
+-label-unfocused = %name%
+-label-unfocused-background = ${color.BGL}
+-label-unfocused-foreground = ${color.PURPLE}
+-label-unfocused-padding = 1
+-#unvisible but not empty
+-label-visible = %name%
+-label-visible-background = ${color.BGL}
+-label-visible-foreground = ${color.GREEN}
+-label-visible-padding = 1
+-#urgent
+-label-urgent = %name%
+-label-urgent-background = ${color.RED}
+-label-urgent-padding = 1
+-#empty
+-label-empty = %name%
+-label-empty-background = ${color.BGL}
+-label-empty-foreground = ${color.FG}
+-label-empty-padding = 1
