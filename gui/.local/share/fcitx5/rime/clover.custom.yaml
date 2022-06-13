@@ -1,0 +1,19 @@
+patch:
+  "switches/@5/reset": 1
+  "engine/processors":
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  "recognizer":
+    import_preset: default
+    patterns:
+      # hack: to enable "/fh" style symbols, '/' must be mapped to a [list].
+      # so those who have customized '/' for direct commit won't be affected by
+      # this change.
+      punct: "^/([0-9]+[a-z]*|[a-z]+)$"
+  "speller/alphabet": zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
