@@ -1,0 +1,13 @@
+[Unit]
+Description=Clash service
+After=network.target
+
+[Service]
+Type=simple
+User=zhao
+ExecStart=/usr/bin/clash
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
