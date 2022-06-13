@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# kde_simplemenu		kde_krunner screen
+# slingshot		appdrawer			appdrawer_alt	appfolder
+
+theme="nord"
+dir="$HOME/.config/rofi"
+
+rofi -no-lazy-grab -show drun -modi drun -theme $dir/"$theme"

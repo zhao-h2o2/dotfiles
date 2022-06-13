@@ -1,0 +1,11 @@
+#!/bin/bash
+
+Monitor_ex=$(xrandr -q | grep -w "connected" | awk '{print $1}' | grep "HDMI")
+Monitor_in=$(xrandr -q | grep -w "connected" | awk '{print $1}' | grep "eDP")
+
+if [ $Monitor_ex ];then
+  xrandr --output $Monitor_ex --primary --mode 1920x1080 --pos 0x840 --rotate normal\
+         --output $Monitor_in --mode 1920x1080 --pos 1920x0 --rotate right
+else
+  xrandr --output $Monitor_in --primary --mode 1920x1080 --pos 0x0 --rotate normal
+fi
