@@ -1,0 +1,20 @@
+# Important Path
+/home/zhao/Research
+/home/zhao/Downloads
+/home/zhao/Pictures
+
+# dotfiles
+/home/zhao/.config/zsh
+/home/zhao/.config/ranger
+/home/zhao/.config/ranger/rc.conf
+/home/zhao/.config/nvim
+/home/zhao/.dotfiles/suckless/dwm
+/home/zhao/.dotfiles/suckless/dwm/config.h
+/home/zhao/.local/bin/autostart.sh
+/home/zhao/.dotfiles/suckless/dmenu
+/home/zhao/.dotfiles/suckless/dmenu/config.h
+/home/zhao/.dotfiles/suckless/st
+/home/zhao/.dotfiles/suckless/st/config.h
+
+# Scripts
+/home/zhao/.local/bin
