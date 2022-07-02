@@ -13,3 +13,4 @@ xmonad/.xmonad/xmonad.o
 xmonad/.xmonad/xmonad-x86_64-linux
 xmonad/.xmonad/lib/Colors/*.hi
 xmonad/.xmonad/lib/Colors/*.o
+.stignore
