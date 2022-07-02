@@ -6,3 +6,7 @@
 	path = suckless/dwm
 	url = git@github.com:zhao-h2o2/dwm.git
 	branch = main
+[submodule "shell/.config/nvim"]
+	path = shell/.config/nvim
+	url = git@github.com:zhao-h2o2/nvim.git
+	branch = master
