@@ -1,0 +1,4 @@
+[submodule "suckless/dwm-flexipatch"]
+	path = suckless/dwm-flexipatch
+	url = git@github.com:zhao-h2o2/dwm-flexipatch.git
+	branch = myconfig
